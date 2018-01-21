@@ -7,6 +7,7 @@ import path from 'path';
 // import favicon from 'serve-favicon';
 
 import index from './routes/index';
+import login from './routes/login';
 
 const app = express();
 const debug = Debug('crypto-martket-watcher:app');
@@ -50,5 +51,8 @@ process.on('uncaughtException', (err) => {
   debug('Caught exception: %j', err);
   process.exit(1);
 });
+
+app.use('/login', login);
+
 
 export default app;
