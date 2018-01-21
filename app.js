@@ -4,6 +4,7 @@ import Debug from 'debug';
 import express from 'express';
 import logger from 'morgan';
 import path from 'path';
+
 // import favicon from 'serve-favicon';
 
 import index from './routes/index';
