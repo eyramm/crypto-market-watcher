@@ -1,38 +1,105 @@
-<section>
-  <div class="container">
-      <div class="col s12">
-          <h5><span class="bit">Bitcoin Prices</span><h5>
-      <div class="one">
-        <p>BitFinex</p>
-          <div id="bid">
-          </div>
-          <div class="one">
-              <p>BTCAverage</p>
-                <div id="bid1">
-        </div>
-      </div>
-  </div>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= title %>
+    </title>
+    <link rel='stylesheet' href='/stylesheets/bootstrap.css' />
+</head>
+
+<body>
+    <h1>
+        <%= title %>
+    </h1>
+
+    <table class="table table-striped table-hover table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">BitFinex</th>
+                <th scope="col">OKCoin</th>
+                <th scope="col">GDAX</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="bid"></td>
+                <td id="bid1"></td>
+                <td id="bid2"></td>
+            </tr>
+    </table>
 
 
-  <script>
-    var ws = new WebSocket("wss://www.bitmex.com/realtime?subscribe=instrument,orderBook:XBTUSD");
-    ws.onopen = function() {
-        ws.send(JSON.stringify({
-            "event": "subscribe",
-            "channel": "ticker",
-            "pair": "BTCUSD"
-        }));
-    };
-    
-    ws.onmessage = function(msg) {
-        var response = JSON.parse(msg.data);
-        console.log(response);
-  
-        var hb = response[1];
-        if (hb != "hb") {
-            document.getElementById("bid").textContent = "Current Price : $" + response[1];
+
+
+    <script>
+        //first
+
+        var ws = new WebSocket("wss://real.okcoin.com:10440/websocket");
+        ws.onopen = function () {
+            ws.send(JSON.stringify({
+                "event": "addChannel",
+                "channel": "ok_sub_spot_btc_usd_ticker",
+            }));
+        };
+
+        ws.onmessage = function (msg) {
+            var response = JSON.parse(msg.data);
+            console.log(response);
+
+            for (var key in response) {
+                if (response.hasOwnProperty(key)) {
+                    document.getElementById("bid1").textContent = "$" + response[key].data.sell;
+                }
+            }
+        };
+
+        //second
+
+        var ws1 = new WebSocket("wss://api.bitfinex.com/ws");
+        ws1.onopen = function () {
+            ws1.send(JSON.stringify({
+                "event": "subscribe",
+                "channel": "ticker",
+                "pair": "BTCUSD"
+            }));
+        };
+
+        ws1.onmessage = function (msg) {
+            var response = JSON.parse(msg.data);
+            console.log(response);
+
+            var hb = response[1];
+            if (hb != "hb") {
+                document.getElementById("bid").textContent = "$" + response[1];
+            }
+        };
+
+        //third
+
+        var ws2 = new WebSocket("wss://ws-feed.gdax.com");
+        ws2.onopen = function () {
+            ws2.send(JSON.stringify({
+                "type": "subscribe",
+                "product_ids": [
+                    "BTC-USD"
+                ],
+                "channels": ["ticker"]
+            }));
+        };
+
+        ws2.onmessage = function (msg) {
+            var response = JSON.parse(msg.data);
+            console.log(response);
+
+            for (var key in response) {
+                if (response.hasOwnProperty(key)) {
+                    document.getElementById("bid2").textContent = "$" + response["price"];
+                }
+            }
         }
-    };
-    </script>
 
-</section>  
+    </script>
+</body>
+
+</html>
